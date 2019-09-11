@@ -19,6 +19,43 @@
 by capi:browser-pane."
   (format nil "http://quickdocs.org/~a/" distribution))
 
+(defun callback-perform-search (data interface)
+  "Perform a search with the text-input-search content."
+  (declare (ignore data))
+  (with-slots (text-input-search list-panel-result)
+      interface
+    (setf (distributions interface)
+          (search-distributions (capi:text-input-pane-text text-input-search)))
+    ;; First, remove all elements from the distribution list. Do so by
+    ;; sending a predicate that always returns a subclass of T.
+    (capi:remove-items list-panel-result #'(lambda (x) x))
+    ;; Perform a distribution search and append all elements to the
+    ;; list panel.
+    (capi:append-items list-panel-result
+                       (mapcar #'ql-dist:name (distributions interface)))))
+
+(defun callback-install-distribution (data interface)
+  "Install the selected distribution."
+  (declare (ignore data))
+  (with-slots (list-panel-result)
+      interface
+    (let ((selected-distribution (capi:choice-selected-item list-panel-result)))
+      (ql:quickload selected-distribution)
+      ;; TODO Actually display the output somewhere and check whether
+      ;; the installation was successful. Hint: use capi:collect-pane
+      ;; for displaying the installation output.
+      (capi:display-message "Installed ~s" selected-distribution))))
+
+(defun callback-display-quickdocks (data interface)
+  "Open a browser pane and display the quickdocks page for the
+selected distribution."
+  (declare (ignore interface))
+  (capi:contain (make-instance 'capi:browser-pane
+                               :url (make-quickdocks-url data))
+                :title (format nil "~a | Quickdocks" data)
+                :best-width 1024
+                :best-height 768))
+
 (capi:define-interface main-window ()
   ((distributions :accessor distributions
                   :initform '()
@@ -30,40 +67,14 @@ by capi:browser-pane."
    (push-button-search
     capi:push-button
     :text "OK"
-    :callback #'(lambda (data interface)
-                  (declare (ignore data))
-                  (setf (distributions interface)
-                        (search-distributions
-                         (capi:text-input-pane-text text-input-search)))
-                  ;; First, remove all elements from the distribution
-                  ;; list. Do so by sending a predicate that always
-                  ;; returns a subclass of T.
-                  (capi:remove-items list-panel-result #'(lambda (x) x))
-                  ;; Perform a distribution search and append all
-                  ;; elements to the list panel.
-                  (capi:append-items list-panel-result
-                                     (mapcar #'ql-dist:name (distributions interface)))))
+    :callback #'callback-perform-search)
    (push-button-install
     capi:push-button
     :text "Install"
-    :callback #'(lambda (data interface)
-                  (declare (ignore data interface))
-                  (let ((selected-distribution (capi:choice-selected-item list-panel-result)))
-                    (ql:quickload selected-distribution)
-                    ;; TODO Actually display the output somewhere and
-                    ;; check whether the installation was successful.
-                    ;; Hint: use capi:collect-pane for displaying the
-                    ;; installation output.
-                    (capi:display-message "Installed ~s" selected-distribution))))
+    :callback #'callback-install-distribution)
    (list-panel-result
     capi:list-panel
-    :action-callback #'(lambda (data interface)
-                         (declare (ignore interface))
-                         (capi:contain (make-instance 'capi:browser-pane
-                                                      :url (make-quickdocks-url data))
-                                       :title (format nil "~a | Quickdocks" data)
-                                       :best-width 1024
-                                       :best-height 768))
+    :action-callback #'callback-display-quickdocks
     :items '()))
   (:layouts
    (layout-main capi:column-layout

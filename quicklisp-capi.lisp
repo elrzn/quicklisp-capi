@@ -14,6 +14,11 @@
                    (search-term (ql::release system)))
           collect system)))
 
+(defun make-quickdocks-url (distribution)
+  "Return an URL in the form of string. This will be consumed later on
+by capi:browser-pane."
+  (format nil "http://quickdocs.org/~a/" distribution))
+
 (capi:define-interface main-window ()
   ((distributions :accessor distributions
                   :initform '()
@@ -40,6 +45,13 @@
                                      (mapcar #'ql-dist:name (distributions interface)))))
    (list-panel-result
     capi:list-panel
+    :action-callback #'(lambda (data interface)
+                         (declare (ignore interface))
+                         (capi:contain (make-instance 'capi:browser-pane
+                                                      :url (make-quickdocks-url data))
+                                       :title (format nil "~a | Quickdocks" data)
+                                       :best-width 1024
+                                       :best-height 768))
     :items '()))
   (:layouts
    (layout-main capi:column-layout

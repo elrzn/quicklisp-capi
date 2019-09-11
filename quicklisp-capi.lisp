@@ -15,7 +15,9 @@
           collect system)))
 
 (capi:define-interface main-window ()
-  ()
+  ((distributions :accessor distributions
+                  :initform '()
+                  :documentation "The list of distributions for the current search."))
   (:panes
    (text-input-search
     capi:text-input-pane
@@ -24,7 +26,10 @@
     capi:push-button
     :text "OK"
     :callback #'(lambda (data interface)
-                  (declare (ignore data interface))
+                  (declare (ignore data))
+                  (setf (distributions interface)
+                        (search-distributions
+                         (capi:text-input-pane-text text-input-search)))
                   ;; First, remove all elements from the distribution
                   ;; list. Do so by sending a predicate that always
                   ;; returns a subclass of T.
@@ -32,9 +37,7 @@
                   ;; Perform a distribution search and append all
                   ;; elements to the list panel.
                   (capi:append-items list-panel-result
-                                     (mapcar #'ql-dist:name
-                                             (search-distributions
-                                              (capi:text-input-pane-text text-input-search))))))
+                                     (mapcar #'ql-dist:name (distributions interface)))))
    (list-panel-result
     capi:list-panel
     :items '()))

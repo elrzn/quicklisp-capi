@@ -4,8 +4,10 @@
 
 (defun search-distributions (term)
   "From the given query string, return a list of distributions."
-  (setf term (string-downcase term))
-  (loop for system in (ql-dist:provided-systems t)
-        when (or (search term (ql-dist:name system))
-                 (search term (ql-dist:name (ql::release system))))
-        collect system))
+  (flet ((search-term (system)
+           (search (string-downcase term)
+                   (ql-dist:name system))))
+    (loop for system in (ql-dist:provided-systems t)
+          when (or (search-term system)
+                   (search-term (ql::release system)))
+          collect system)))

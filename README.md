@@ -1,9 +1,9 @@
 # quicklisp-capi
-### _Eric Lorenzana_
 
-This is a project to do ... something.
+A quicklisp graphical interface.
+
+![](./screenshot.png)
 
 ## License
 
 Specify license here
-

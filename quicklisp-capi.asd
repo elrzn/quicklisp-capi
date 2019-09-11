@@ -1,9 +1,11 @@
 ;;;; quicklisp-capi.asd
+;;
+;;;; Copyright (c) 2019 Eric Lorenzana <eric.lorenzana@protonmail.ch>
 
 (asdf:defsystem #:quicklisp-capi
-  :description "Describe quicklisp-capi here"
+  :description "Quicklisp graphical interface"
   :author "Eric Lorenzana"
-  :license  "Specify license here"
+  :license "TODO"
   :version "0.0.1"
   :serial t
   :components ((:file "package")

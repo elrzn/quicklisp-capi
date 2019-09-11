@@ -6,4 +6,4 @@ A quicklisp graphical interface.
 
 ## License
 
-Specify license here
+Copyright (c) 2019 Eric Lorenzana <eric.lorenzana@protonmail.ch>

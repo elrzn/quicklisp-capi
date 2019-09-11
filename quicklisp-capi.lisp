@@ -43,6 +43,18 @@ by capi:browser-pane."
                   ;; elements to the list panel.
                   (capi:append-items list-panel-result
                                      (mapcar #'ql-dist:name (distributions interface)))))
+   (push-button-install
+    capi:push-button
+    :text "Install"
+    :callback #'(lambda (data interface)
+                  (declare (ignore data interface))
+                  (let ((selected-distribution (capi:choice-selected-item list-panel-result)))
+                    (ql:quickload selected-distribution)
+                    ;; TODO Actually display the output somewhere and
+                    ;; check whether the installation was successful.
+                    ;; Hint: use capi:collect-pane for displaying the
+                    ;; installation output.
+                    (capi:display-message "Installed ~s" selected-distribution))))
    (list-panel-result
     capi:list-panel
     :action-callback #'(lambda (data interface)
@@ -63,7 +75,8 @@ by capi:browser-pane."
                   :title "Search"
                   :title-position :frame)
    (layout-result capi:column-layout
-                  '(list-panel-result)
+                  '(list-panel-result
+                    push-button-install)
                   :title "Result"
                   :title-position :frame))
   (:default-initargs :title "Quicklisp"

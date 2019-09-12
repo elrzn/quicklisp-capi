@@ -33,6 +33,21 @@ by capi:browser-pane."
       ;; for displaying the installation output.
       (capi:display-message "Installed ~s" selected-distribution))))
 
+(defun callback-perform-search (data interface)
+  "Perform a search with the text-input-search content."
+  (declare (ignore data))
+  (with-slots (text-input-search list-panel-result)
+      interface
+    (setf (distributions interface)
+          (search-distributions (capi:text-input-pane-text text-input-search)))
+    ;; First, remove all elements from the distribution list. Do so by
+    ;; sending a predicate that always returns a subclass of T.
+    (capi:remove-items list-panel-result #'(lambda (x) x))
+    ;; Perform a distribution search and append all elements to the
+    ;; list panel.
+    (capi:append-items list-panel-result
+                       (mapcar #'ql-dist:name (distributions interface)))))
+
 (defun callback-display-quickdocks (data interface)
   "Open a browser pane and display the quickdocks page for the
 selected distribution."

@@ -49,8 +49,8 @@ selected distribution."
   (capi:contain (make-instance 'capi:browser-pane
                                :url (make-quickdocks-url data))
                 :title (format nil "~a | Quickdocks" data)
-                :best-width 1024
-                :best-height 768))
+                :best-width 820
+                :best-height 640))
 
 (capi:define-interface main-window ()
   ((distributions

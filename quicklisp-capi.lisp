@@ -4,15 +4,6 @@
 
 (in-package #:quicklisp-capi)
 
-(defun string-equal-prefix (string item)
-  (let* ((start 0)
-         (len (length item))
-         (end (+ start (length string))))
-    (and (>= len end )
-         (string-equal string item
-                       :start2 start
-                       :end2 end))))
-
 (defun search-distributions (term)
   "From the given query string, return a list of distributions.
 
@@ -68,15 +59,7 @@ selected distribution."
    (list-panel-result
     capi:list-panel
     :action-callback #'callback-display-quickdocks
-    :items (mapcar #'ql-dist:name distributions)
-    :keyboard-search-callback #'(lambda (pane string position)
-                                  (capi:list-panel-search-with-function
-                                   pane
-                                   'string-equal-prefix ; or 'string-not-greaterp
-                                   string
-                                   :start position
-                                   :reset-time 1
-                                   :wrap-around t))))
+    :items (mapcar #'ql-dist:name distributions)))
   (:layouts
    (layout-main capi:column-layout
                 '(layout-search

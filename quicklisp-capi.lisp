@@ -71,7 +71,6 @@ selected distribution."
    (push-button-install
     capi:push-button
     :text "Install"
-    :default-p t
     :callback #'callback-install-distribution)
    (list-panel-result
     capi:list-panel

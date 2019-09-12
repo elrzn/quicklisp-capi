@@ -1,6 +1,4 @@
 ;;;; quicklisp-capi.lisp
-;;
-;;;; Copyright (c) 2019 Eric Lorenzana <eric.lorenzana@protonmail.ch>
 
 (in-package #:quicklisp-capi)
 

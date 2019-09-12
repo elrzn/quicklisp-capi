@@ -4,8 +4,19 @@
 
 (in-package #:quicklisp-capi)
 
+(defun string-equal-prefix (string item)
+  (let* ((start 0)
+         (len (length item))
+         (end (+ start (length string))))
+    (and (>= len end )
+         (string-equal string item
+                       :start2 start
+                       :end2 end))))
+
 (defun search-distributions (term)
-  "From the given query string, return a list of distributions."
+  "From the given query string, return a list of distributions.
+
+An empty string will return a list of all distributions."
   (flet ((search-term (system)
            (search (string-downcase term)
                    (ql-dist:name system))))
@@ -18,21 +29,6 @@
   "Return an URL in the form of string. This will be consumed later on
 by capi:browser-pane."
   (format nil "http://quickdocs.org/~a/" distribution))
-
-(defun callback-perform-search (data interface)
-  "Perform a search with the text-input-search content."
-  (declare (ignore data))
-  (with-slots (text-input-search list-panel-result)
-      interface
-    (setf (distributions interface)
-          (search-distributions (capi:text-input-pane-text text-input-search)))
-    ;; First, remove all elements from the distribution list. Do so by
-    ;; sending a predicate that always returns a subclass of T.
-    (capi:remove-items list-panel-result #'(lambda (x) x))
-    ;; Perform a distribution search and append all elements to the
-    ;; list panel.
-    (capi:append-items list-panel-result
-                       (mapcar #'ql-dist:name (distributions interface)))))
 
 (defun callback-install-distribution (data interface)
   "Install the selected distribution."
@@ -57,17 +53,14 @@ selected distribution."
                 :best-height 768))
 
 (capi:define-interface main-window ()
-  ((distributions :accessor distributions
-                  :initform '()
-                  :documentation "The list of distributions for the current search."))
+  ((distributions
+    :accessor distributions
+    :initform (search-distributions "")
+    :documentation "The list of distributions for the current search."))
   (:panes
    (text-input-search
     capi:text-input-pane
     :title "Search distribution")
-   (push-button-search
-    capi:push-button
-    :text "OK"
-    :callback #'callback-perform-search)
    (push-button-install
     capi:push-button
     :text "Install"
@@ -75,14 +68,21 @@ selected distribution."
    (list-panel-result
     capi:list-panel
     :action-callback #'callback-display-quickdocks
-    :items '()))
+    :items (mapcar #'ql-dist:name distributions)
+    :keyboard-search-callback #'(lambda (pane string position)
+                                  (capi:list-panel-search-with-function
+                                   pane
+                                   'string-equal-prefix ; or 'string-not-greaterp
+                                   string
+                                   :start position
+                                   :reset-time 1
+                                   :wrap-around t))))
   (:layouts
    (layout-main capi:column-layout
                 '(layout-search
                   layout-result))
    (layout-search capi:row-layout
-                  '(text-input-search
-                    push-button-search)
+                  '(text-input-search)
                   :title "Search"
                   :title-position :frame)
    (layout-result capi:column-layout

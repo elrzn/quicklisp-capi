@@ -58,29 +58,53 @@ selected distribution."
                 :best-width 820
                 :best-height 640))
 
+(defun callback-filtering-search (interface)
+  "React on filtering input by limiting the displayed distributions to
+those matching the content of the field."
+  (let* ((things (distributions interface)) ; maybe don't be so specific here
+         (filtered-things
+          (multiple-value-bind (regexp excludep)
+              (capi:filtering-layout-match-object-and-exclude-p
+               (main-window-distribution-filtering interface)
+               nil)
+            (if regexp
+                (loop for thing in things
+                      when (if (lispworks:find-regexp-in-string
+                                regexp
+                                (string thing))
+                               (not excludep)
+                             excludep)
+                      collect thing)
+              things))))
+    (setf (capi:collection-items
+           (main-window-list-panel-result interface))
+          filtered-things)))
+
 (capi:define-interface main-window ()
   ((distributions
     :accessor distributions
-    :initform (search-distributions "")
+    :initform (mapcar #'ql-dist:name (search-distributions ""))
     :documentation "The list of distributions for the current search."))
   (:panes
-   (text-input-search
-    capi:text-input-pane
-    :title "Search distribution")
+   (distribution-filtering
+    capi:filtering-layout
+    :change-callback 'callback-filtering-search
+    :reader main-window-distribution-filtering)
    (push-button-install
     capi:push-button
     :text "Install"
     :callback #'callback-install-distribution)
    (list-panel-result
     capi:list-panel
+    :reader main-window-list-panel-result
     :action-callback #'callback-display-quickdocks
-    :items (mapcar #'ql-dist:name distributions)))
+    :items distributions))
   (:layouts
    (layout-main capi:column-layout
                 '(layout-search
                   layout-result))
    (layout-search capi:row-layout
-                  '(text-input-search)
+                  '(distribution-filtering)
                   :title "Search"
                   :title-position :frame)
    (layout-result capi:column-layout

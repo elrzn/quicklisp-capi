@@ -110,7 +110,7 @@ those matching the content of the field."
    (layout-result capi:column-layout
                   '(list-panel-result
                     push-button-install)
-                  :title "Result"
+                  :title "Distributions"
                   :title-position :frame))
   (:default-initargs :title "Quicklisp"
    :best-width 480

@@ -3,7 +3,7 @@
 (asdf:defsystem #:quicklisp-capi
   :description "Quicklisp graphical interface"
   :author "Eric Lorenzana"
-  :license "ISC"
+  :license "The Unlicense"
   :version "0.0.1"
   :serial t
   :components ((:file "package")
